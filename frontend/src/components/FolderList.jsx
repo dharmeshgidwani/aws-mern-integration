@@ -1,44 +1,86 @@
 import React, { useState, useEffect } from "react";
-import axios from "axios";
 import { useParams } from "react-router-dom";
+import axios from "axios";
 
-const FolderList = ({ onFileClick }) => {
-  const { bucketName } = useParams();
-  const [folders, setFolders] = useState([]);
-  const [files, setFiles] = useState([]);
-  const [loading, setLoading] = useState(true);
+const FolderList = () => {
+  const { bucketName, folderPath } = useParams();
+  const [items, setItems] = useState([]);
+  const [schema, setSchema] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
-    axios.get(`http://localhost:5002/api/s3/list-files?bucketName=${bucketName}`)
-      .then(res => {
-        setFolders(res.data.folders);
-        setFiles(res.data.files);
-        setLoading(false);
-      })
-      .catch(err => console.error("Error fetching S3 objects:", err));
-  }, [bucketName]);
+    fetchFolderContents();
+  }, [folderPath]);
+
+  const fetchFolderContents = async () => {
+    try {
+      const response = await axios.get("http://localhost:5002/api/s3/list-files", {
+        params: { bucketName, prefix: folderPath ? `${folderPath}/` : "" },
+      });
+      setItems(response.data);
+    } catch (err) {
+      console.error("Error fetching folder contents:", err);
+      setError("Failed to load folder contents");
+    }
+  };
+
+  const fetchSchema = async (fileName) => {
+    setLoading(true);
+    setSchema([]);
+    setError(null);
+
+    try {
+      const response = await axios.post("http://localhost:5002/api/schema/file-schema", {
+        bucketName,
+        fileName,
+      });
+      setSchema(response.data.schema);
+    } catch (err) {
+      console.error("Error fetching file schema:", err);
+      setError("Failed to load file schema");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <div>
-      <h2>Contents of {bucketName}</h2>
-      {loading ? <p>Loading...</p> : (
-        <>
-          <h3>📁 Folders</h3>
-          <ul>
-            {folders.length > 0 ? folders.map(folder => (
-              <li key={folder}><button>{folder}</button></li>
-            )) : <li>No folders found</li>}
-          </ul>
+      <h2>Contents of {folderPath || "Root"}</h2>
+      
+      {error && <p style={{ color: "red" }}>{error}</p>}
 
-          <h3>📄 Files</h3>
+      <ul>
+        {/* Display folders */}
+        {items.folders?.map((folder) => (
+          <li key={folder}>
+            <button onClick={() => window.location.href = `/bucket/${bucketName}/${folder}`}>
+              📁 {folder}
+            </button>
+          </li>
+        ))}
+
+        {/* Display files */}
+        {items.files?.map((file) => (
+          <li key={file}>
+            <button onClick={() => fetchSchema(file)}>
+              📄 {file}
+            </button>
+          </li>
+        ))}
+      </ul>
+
+      {/* Show Schema if available */}
+      {loading && <p>Loading schema...</p>}
+      {schema.length > 0 && (
+        <div>
+          <h3>Schema (Column Names)</h3>
           <ul>
-            {files.length > 0 ? files.map(file => (
-              <li key={file}>
-                <button onClick={() => onFileClick(file)}>{file}</button>
-              </li>
-            )) : <li>No files found</li>}
+            {schema.map((column, index) => (
+              <li key={index}>{column}</li>
+            ))}
           </ul>
-        </>
+        </div>
       )}
     </div>
   );

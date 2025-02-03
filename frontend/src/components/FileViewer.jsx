@@ -8,7 +8,6 @@ const FileViewer = () => {
   const [columns, setColumns] = useState([]);
   const [loading, setLoading] = useState(false);
 
-  // Fetch tables when file is clicked
   const fetchTables = () => {
     setLoading(true);
     axios.post("http://localhost:5002/api/athena/tables", { database: bucketName })
@@ -19,7 +18,6 @@ const FileViewer = () => {
       .catch(err => console.error("Error fetching tables:", err));
   };
 
-  // Fetch schema when table is clicked
   const fetchSchema = (table) => {
     setLoading(true);
     axios.post("http://localhost:5002/api/athena/table-schema", { database: bucketName, table })

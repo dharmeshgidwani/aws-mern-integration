@@ -28,17 +28,11 @@ router.get("/list-files", async (req, res) => {
   const params = {
     Bucket: bucketName,
     Prefix: prefix || "",
-    Delimiter: "/",
+    Delimiter: "/", // Helps separate folders and files
   };
 
   try {
     const data = await s3.listObjectsV2(params).promise();
-
-    if (!data) {
-      throw new Error("No data received from S3");
-    }
-
-    console.log("S3 Response:", JSON.stringify(data, null, 2));
 
     const filesAndFolders = {
       folders: data.CommonPrefixes ? data.CommonPrefixes.map((item) => item.Prefix) : [],
@@ -51,6 +45,7 @@ router.get("/list-files", async (req, res) => {
     res.status(500).json({ error: error.message || "Failed to fetch files." });
   }
 });
+
 
 
   

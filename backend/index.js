@@ -7,7 +7,7 @@ app.use(cors());
 app.use(express.json());
 
 const s3Routes = require("./routes/s3Routes");
-const athenaRoutes = require("./routes/athenaRoutes");
+const athenaRoutes = require("./routes/schemaRoutes");
 
 app.use("/api/s3", s3Routes);
 app.use("/api/athena", athenaRoutes);
