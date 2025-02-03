@@ -1,0 +1,60 @@
+# Node.js dependencies
+node_modules/
+package-lock.json
+yarn.lock
+
+# Environment variables
+.env
+.env.local
+.env.development
+.env.production
+.env.test
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+debug.log*
+error.log
+pm2.log
+output.log
+
+# AWS Credentials (Ensure this file is NOT committed)
+aws-config.json
+
+# Build files
+dist/
+build/
+.cache/
+.next/
+out/
+.vite/
+
+# Editor settings
+.vscode/
+.idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# OS-specific files
+.DS_Store
+Thumbs.db
+
+# Jest testing
+/coverage
+*.lcov
+
+# AWS SDK Cache
+.aws/
+
+# Athena query results
+athena_query_results/
+
+# Miscellaneous
+*.bak
+*.tmp
